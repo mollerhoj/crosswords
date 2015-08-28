@@ -26,6 +26,14 @@ CROSSWORD = [ %w(. . . . .),
               %w(. . . ? .),
               %w(. ? . . .) ]
 
+UNFILLED = []
+
+# {
+#   position: [x,y]
+#   letter: 'a'
+#   possibility: 4
+# }
+
 $last_xs = []
 $last_ys = []
 $last_letters = []
@@ -36,10 +44,9 @@ class WordJuggler
     best_letter = 'x'
     possible_letters = 0
     p_max = 0
-    possible_letters_list = []
 
-    regexpH = horizontal_word(x,y)
-    regexpV = vertical_word(x,y) 
+    horizontal_word = horizontal_word(x,y)
+    vertical_word = vertical_word(x,y) 
     offsetH = horizontal_word_start_position(x,y)[0]
     offsetV = vertical_word_start_position(x,y)[1]
 
@@ -47,20 +54,20 @@ class WordJuggler
 
     letters.each do |letter|
 
-      regexpH[x-offsetH] = letter
-      regexpV[y-offsetV] = letter
+      horizontal_word[x-offsetH] = letter
+      vertical_word[y-offsetV] = letter
 
       # data structure
-      if regexpH.length <= MAX_WORD_SIZE
-        pH = $word_hash[regexpH]
+      if horizontal_word.length <= MAX_WORD_SIZE
+        pH = $word_hash[horizontal_word]
       else
-        regexpH = Regexp.new regexpH
-        if $big_word_hash["#{regexpH.length}#{letter}#{x-offsetH}"] == nil
+        horizontal_word = Regexp.new horizontal_word
+        if $big_word_hash["#{horizontal_word.length}#{letter}#{x-offsetH}"] == nil
           pH = 0
         else
           pH = 0
-          $big_word_hash["#{regexpH.length}#{letter}#{x-offsetH}"].each do |w|
-            if w.match regexpH
+          $big_word_hash["#{horizontal_word.length}#{letter}#{x-offsetH}"].each do |w|
+            if w.match horizontal_word
               pH +=1
             end
             if pH > lowest_possible_letters
@@ -70,16 +77,16 @@ class WordJuggler
         end
       end
 
-      if regexpV.length <= MAX_WORD_SIZE
-        pV = $word_hash[regexpV]
+      if vertical_word.length <= MAX_WORD_SIZE
+        pV = $word_hash[vertical_word]
       else
-        regexpV = Regexp.new regexpV
-        if $big_word_hash["#{regexpV.length}#{letter}#{y-offsetV}"] == nil
+        vertical_word = Regexp.new vertical_word
+        if $big_word_hash["#{vertical_word.length}#{letter}#{y-offsetV}"] == nil
           pV = 0
         else
           pV = 0
-          $big_word_hash["#{regexpV.length}#{letter}#{y-offsetV}"].each do |w|
-            if w.match regexpV
+          $big_word_hash["#{vertical_word.length}#{letter}#{y-offsetV}"].each do |w|
+            if w.match vertical_word
               pV += 1
             end
             if pV > lowest_possible_letters
@@ -96,7 +103,6 @@ class WordJuggler
 
       if p > 0
         possible_letters += 1
-        possible_letters_list << [letter, p]
 
         if p > p_max
           p_max = p
@@ -154,18 +160,20 @@ class WordJuggler
     lowest_possible_letters = 999999
     lowest_cell = nil
     lowest_letter = 'z'
-    finished = true
-    failed = false
+    completed = true
+    zero_possibilities = false
+
     CROSSWORD.each_with_index do |row,y|
       row.each_with_index do |cell,x|
-        if !failed
+        if !zero_possibilities
           if CROSSWORD[y][x] == '.'
-            finished = false
+            completed = false
             letter, possible_letters = best_letter_and_possibility(x,y,lowest_possible_letters)
 
+            UNFILLED << {x: x, y: y, letter: letter, posibility: possible_letters}
+
             if possible_letters == 0
-              failed = true
-              # puts "failed with #{letter} at (#{x},#{y})"
+              zero_possibilities = true
             end
 
             if possible_letters < lowest_possible_letters
@@ -178,11 +186,13 @@ class WordJuggler
       end
     end
 
-    if finished
+    puts UNFILLED.inspect
+
+    if completed
       return false
     end
 
-    if failed
+    if zero_possibilities
       last_y = $last_ys.pop
       last_x = $last_xs.pop
       last_letter = $last_letters.pop
@@ -221,6 +231,10 @@ class WordJuggler
 
     Benchmark.bm do |x|
       x.report do
+
+
+
+
         while true
          unless calc_possibilities()
            break
