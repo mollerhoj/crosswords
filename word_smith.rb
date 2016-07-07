@@ -1,24 +1,28 @@
 $word_hash = {}
 $big_word_hash = {}
 
+# This class loads word from the data files
+
 class WordSmith
   def initialize(options)
     @options = options
   end
 
   def load_words
-    puts "loading all words..."
-
+    # Loading all words into the all_words array
     if @options[:generate_big_words] || @options[:generate_data_structure]
       all_words = []
-      File.open('danish2.txt') do |f|
+      File.open('danish_formatted.txt') do |f|
         f.each_line do |line|
           all_words << line.delete("\n")
         end
       end
+
+      # Remove double aa
       if !@options[:double_a_allowed]
         all_words.delete_if { |w| }.delete_if { |w| w.match 'aa' }
       end
+      #
       if !@options[:ae_allowed]
         all_words.delete_if { |w| }.delete_if { |w| w.match 'ae' }
       end

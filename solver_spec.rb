@@ -1,12 +1,18 @@
 require_relative 'solver'
 
-Solver.new.solve
+class SolverSpec
+  def test_simple_run
+    expected = "bagi\nab b\nisac\n"
+    Solver.new.setup.solve == expected
+  end
 
-crossword = [ %w(. . . . .),
-              %w(. . . . ?),
-              %w(. . . . .),
-              %w(. . . ? .),
-              %w(. ? . . .) ]
+  def all_tests
+    test_simple_run
+  end
 
-# TODO: Eliminate global variables
-# Remove words if they contain letters not from @options.letters
+  def run
+    all_tests ? "success" : "failure"
+  end
+end
+
+puts SolverSpec.new.run

@@ -1,11 +1,13 @@
 class Renderer
   def render_crossword(crossword)
+    @canvas = ""
     crossword.each_with_index do |row,y|
       row.each_with_index do |cell,x|
-        print crossword[y][x].gsub('?',' ')
+        @canvas += crossword[y][x].gsub('?',' ')
       end
-      puts 
+      @canvas += "\n"
     end
+    @canvas
   end
 
   def clear_lines(lines)

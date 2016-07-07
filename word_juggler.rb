@@ -4,12 +4,12 @@ require 'msgpack'
 # TODO
 # refactoring
 # cache bestletter + possible_letters
+# Eliminate global variables
+# Remove words if they contain letters not from @options.letters
 
-# {
-#   position: [x,y]
-#   letter: 'a'
-#   possibility: 4
-# }
+#
+# This class contains the core algorithm
+#
 
 class WordJuggler
   def initialize(crossword, options = {})
@@ -128,7 +128,7 @@ class WordJuggler
   end
 
   def calc_possibilities
-    lowest_possible_letters = 999999
+    lowest_possible_letters = Float::INFINITY
     lowest_cell = nil
     lowest_letter = 'z'
     completed = true
@@ -185,16 +185,22 @@ class WordJuggler
   end
 
   def solve
-    puts "starting.."
+    while calc_possibilities; end
+    ::Renderer.new.render_crossword(@crossword)
+  end
 
+  def solve_print_progress
     dim_y.times do
       puts ""
     end
 
+    # print to console
     while true
      break unless calc_possibilities
      ::Renderer.new.clear_lines(dim_y)
-     ::Renderer.new.render_crossword(@crossword)
+     puts ::Renderer.new.render_crossword(@crossword)
     end
+
+    return ::Renderer.new.render_crossword(@crossword)
   end
 end
