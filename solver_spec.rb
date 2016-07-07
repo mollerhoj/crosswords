@@ -2,6 +2,11 @@ require_relative 'solver'
 
 Solver.new.solve
 
-#Renderer.new.render_crossword
+crossword = [ %w(. . . . .),
+              %w(. . . . ?),
+              %w(. . . . .),
+              %w(. . . ? .),
+              %w(. ? . . .) ]
 
-puts WordJuggler.new.horizontal_word(2,1).inspect
+# TODO: Eliminate global variables
+# Remove words if they contain letters not from @options.letters

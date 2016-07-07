@@ -1,10 +1,14 @@
 class Renderer
-  def render_crossword
-    CROSSWORD.each_with_index do |row,y|
+  def render_crossword(crossword)
+    crossword.each_with_index do |row,y|
       row.each_with_index do |cell,x|
-        print CROSSWORD[y][x].gsub('?',' ')
+        print crossword[y][x].gsub('?',' ')
       end
       puts 
     end
+  end
+
+  def clear_lines(lines)
+    puts "\e[#{lines + 1}A"
   end
 end

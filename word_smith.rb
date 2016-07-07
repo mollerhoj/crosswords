@@ -2,26 +2,31 @@ $word_hash = {}
 $big_word_hash = {}
 
 class WordSmith
+  def initialize(options)
+    @options = options
+  end
+
   def load_words
     puts "loading all words..."
-    if GENERATE_BIG_WORDS || GENERATE_DATA_STRUCTURE
+
+    if @options[:generate_big_words] || @options[:generate_data_structure]
       all_words = []
       File.open('danish2.txt') do |f|
         f.each_line do |line|
           all_words << line.delete("\n")
         end
       end
-      if !DOUBLE_A_ALLOWED
+      if !@options[:double_a_allowed]
         all_words.delete_if { |w| }.delete_if { |w| w.match 'aa' }
       end
-      if !AE_ALLOWED
+      if !@options[:ae_allowed]
         all_words.delete_if { |w| }.delete_if { |w| w.match 'ae' }
       end
     end
 
-    if GENERATE_BIG_WORDS
-      LETTERS.each do |letter|
-        (MAX_WORD_SIZE+1..36).to_a.each do |i|
+    if @options[:generate_big_words]
+      @options[:letters].each do |letter|
+        (@options[:small_word_size]+1..@options[:big_word_size]).to_a.each do |i|
           words_of_current_size = all_words.select { |w| w.length == i }
           (0..i-1).each do |j|
             words = words_of_current_size.select { |w| w[j] == letter }
@@ -41,6 +46,7 @@ class WordSmith
       $big_word_hash = MessagePack.unpack(File.read('big_word_hash.msg'))
       puts "...big words loaded"
     end
+
     # # word stats:
     # LETTERS.each do |letter|
     #   puts letter
@@ -53,13 +59,12 @@ class WordSmith
 
     Benchmark.bm do |x|
       x.report do
-        if GENERATE_DATA_STRUCTURE
+        if @options[:generate_data_structure]
           puts "generating data structure..."
           last_percent = -1
           count = all_words.size 
           all_words.each_with_index do |word,word_index|
-            if word.size <= MAX_WORD_SIZE
-              #puts word
+            if word.size <= @options[:small_word_size]
               [0,1].repeated_permutation(word.size).each do |permutation|
                 key = permutation.each_with_index.map { |n,i| n == 0 ? word[i] : '.' }.join('')
                 if $word_hash[key] == nil
