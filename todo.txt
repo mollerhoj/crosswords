@@ -7,3 +7,15 @@ Word smith: Divide into smaller methods
 cache bestletter + possible_letters
 Remove words if they contain letters not from @options.letters
 
+
+
+Make a word stats object
+    # # word stats:
+    # LETTERS.each do |letter|
+    #   puts letter
+    #   (1..36).each do |n|
+    #     puts "#{n}: #{all_words.select { |w| w.length == n && w[0] == letter }.size}"
+    #   end
+    # end
+    # raise "END"
+    #

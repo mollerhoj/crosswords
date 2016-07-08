@@ -182,7 +182,7 @@ class WordJuggler
     return true
   end
 
-  def solve()
+  def solve
     while calc_possibilities; end
     ::Renderer.new.render_crossword(@crossword)
   end
