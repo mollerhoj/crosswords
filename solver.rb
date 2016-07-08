@@ -1,16 +1,11 @@
 require_relative 'word_smith'
 require_relative 'word_juggler'
 require_relative 'renderer'
+require_relative 'config'
 
 class Solver
-  attr_accessor :options
-
   def initialize(options = {})
-    @options = {
-      print_progress: false,
-      generate_big_words: true,
-      generate_small_words: true 
-    }.merge(options)
+    @config = Config.new(options)
   end
 
   def setup
@@ -18,8 +13,9 @@ class Solver
                   %w(. . ? .),
                   %w(. . . .) ]
 
-    @word_smith = WordSmith.new(@options)
-    @word_juggler = WordJuggler.new(crossword,@options)
+    options = @config.options
+    @word_smith = WordSmith.new(options)
+    @word_juggler = WordJuggler.new(crossword, options)
     self
   end
 

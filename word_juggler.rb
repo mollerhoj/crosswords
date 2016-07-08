@@ -1,31 +1,16 @@
-# TODO
-#
-# ____refactoring___
-# options should be a global shared object
-# Word smith: Write unit tests for generation
-# Word smith: Divide into smaller methods
-#
-# cache bestletter + possible_letters
-# Remove words if they contain letters not from @options.letters
-
 #
 # This class contains the core algorithm
 #
 
+require_relative 'config'
+
 class WordJuggler
   def initialize(crossword, options = {})
-    @options = default_options.merge(options)
+    @options = Config.new(options).options
     @crossword = crossword
     @tried = Array.new(dim_y) { Array.new(dim_x) {Array.new} }
     @last = []
     @last_depth = 0
-  end
-
-  def default_options
-    { 
-      small_word_size: 5,
-      letters: %w(a b c d e f g h i j k l m n o p q r s t u v w x y z æ ø å)
-    }
   end
 
   # The word map must be set before the algorithm can run

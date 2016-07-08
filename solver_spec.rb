@@ -1,18 +1,18 @@
 require_relative 'solver'
 
 class SolverSpec
-  def test_simple_run
+  def test_more_big_words
     expected = "edle\nor v\nfæle\n"
-    Solver.new({}).setup.solve == expected
+    Solver.new({print_progress: false, small_words_size: 3}).setup.solve == expected
   end
 
   def test_print_progress
-    Solver.new.setup.solve_print_progress
+    Solver.new({print_progress: false}).setup.solve_print_progress
   end
 
   def all_tests
-    test_simple_run &&
-    test_print_progress
+    test_more_big_words &&
+    test_print_progress 
   end
 
   def run

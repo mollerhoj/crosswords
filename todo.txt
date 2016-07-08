@@ -1,0 +1,9 @@
+TODO
+
+____refactoring___
+Word smith: Write unit tests for generation
+Word smith: Divide into smaller methods
+
+cache bestletter + possible_letters
+Remove words if they contain letters not from @options.letters
+
