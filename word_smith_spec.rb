@@ -1,23 +1,28 @@
 require_relative 'word_smith'
 
 class WordSmithSpec
-  def test_simple_run
-    expected = "bagi\nab b\nisac\n"
-    word_smith = WordSmith.new({
-      generate_big_words: @generate_big_words,
-      generate_data_structure: @generate_data_structure,
-      double_a_allowed: @double_a_allowed,
-      ae_allowed: @ae_allowed,
-      small_word_size: @small_word_size,
-      big_word_size: @big_word_size,
-      letters: @letters
-    })
-    puts word_smith.load_words
-    false
+  def test_load_datastructures
+    word_smith = WordSmith.new({print_progress: false, words_file: 'danish_test_set_4383.txt'})
+    word_map = word_smith.load_words
+    return word_map[:small_words].size == 19832 && word_map[:big_words].size == 354
+  end
+
+  def test_generate_small_words_data_structure
+    word_smith = WordSmith.new({generate_small_words: true, print_progress: false, words_file: 'danish_test_set_4383.txt'})
+    word_map = word_smith.load_words
+    word_map[:small_words].size == 3084
+  end
+
+  def test_generate_big_words_data_structure
+    word_smith = WordSmith.new({generate_big_words: true, print_progress: false, words_file: 'danish_test_set_4383.txt'})
+    word_map = word_smith.load_words
+    word_map[:big_words].size == 298
   end
 
   def all_tests
-    test_simple_run
+    test_load_datastructures &&
+    test_generate_big_words_data_structure &&
+    test_generate_small_words_data_structure
   end
 
   def run

@@ -1,18 +1,33 @@
-$word_hash = {}
-$big_word_hash = {}
+require 'msgpack'
 
 # This class loads word from the data files
 
 class WordSmith
-  def initialize(options)
-    @options = options
+  def initialize(options = {})
+    @options = default_options.merge(options)
+    @small_words = {}
+    @big_words = {}
+  end
+
+  def default_options
+    {
+      print_progress: true,
+      generate_big_words: false,
+      generate_small_words: false,
+      double_a_allowed: false,
+      ae_allowed: false,
+      small_word_size: 5,
+      big_word_size: 7,
+      words_file: 'danish_test_set_39038.txt',
+      letters: %w(a b c d e f g h i j k l m n o p q r s t u v w x y z æ ø å) 
+    }
   end
 
   def load_words
     # Loading all words into the all_words array
-    if @options[:generate_big_words] || @options[:generate_data_structure]
+    if @options[:generate_big_words] || @options[:generate_small_words]
       all_words = []
-      File.open('danish_formatted.txt') do |f|
+      File.open(@options[:words_file]) do |f|
         f.each_line do |line|
           all_words << line.delete("\n")
         end
@@ -35,20 +50,20 @@ class WordSmith
           (0..i-1).each do |j|
             words = words_of_current_size.select { |w| w[j] == letter }
             if words.size > 0
-              $big_word_hash["#{i}#{letter}#{j}"] = words
+              @big_words["#{i}#{letter}#{j}"] = words
             end
           end
         end
-        print letter
+        conditional_print letter
       end
 
       File.open("big_word_hash.msg","w") do |f|
-        f.write($big_word_hash.to_msgpack)
+        f.write(@big_words.to_msgpack)
       end
     else
-      puts "loading big words..."
-      $big_word_hash = MessagePack.unpack(File.read('big_word_hash.msg'))
-      puts "...big words loaded"
+      conditional_puts "loading big words..."
+      @big_words = MessagePack.unpack(File.read('big_word_hash.msg'))
+      conditional_puts "...big words loaded: #{@big_words.size}"
     end
 
     # # word stats:
@@ -61,44 +76,56 @@ class WordSmith
     # raise "END"
     #
 
-    Benchmark.bm do |x|
-      x.report do
-        if @options[:generate_data_structure]
-          puts "generating data structure..."
-          last_percent = -1
-          count = all_words.size 
-          all_words.each_with_index do |word,word_index|
-            if word.size <= @options[:small_word_size]
-              [0,1].repeated_permutation(word.size).each do |permutation|
-                key = permutation.each_with_index.map { |n,i| n == 0 ? word[i] : '.' }.join('')
-                if $word_hash[key] == nil
-                  $word_hash[key] = 1
-                else
-                  $word_hash[key] += 1
-                end
-              end
-            end
-            percent = ((word_index.to_f/count.to_f) * 100).to_i
-            if percent > last_percent
-              puts "#{percent} of 100 "
-              last_percent = percent
+    if @options[:generate_small_words]
+      conditional_puts "generating data structure..."
+      last_percent = -1
+      count = all_words.size 
+      all_words.each_with_index do |word,word_index|
+        if word.size <= @options[:small_word_size]
+          [0,1].repeated_permutation(word.size).each do |permutation|
+            key = permutation.each_with_index.map { |n,i| n == 0 ? word[i] : '.' }.join('')
+            if @small_words[key] == nil
+              @small_words[key] = 1
+            else
+              @small_words[key] += 1
             end
           end
-          puts "...data structure finished"
-
-          File.open("word_hash.msg","w") do |f|
-            f.write($word_hash.to_msgpack)
-          end
-
-          puts "data structure saved"
-          all_words = nil #gb collect
-        else
-          puts "loading data structure..."
-
-          $word_hash = MessagePack.unpack(File.read('word_hash.msg'))
-          puts "...data structure loaded"
+        end
+        percent = ((word_index.to_f/count.to_f) * 100).to_i
+        if percent > last_percent
+          conditional_puts "#{percent} of 100 "
+          last_percent = percent
         end
       end
+      conditional_puts "...data structure finished"
+
+      File.open("small_word_hash.msg","w") do |f|
+        f.write(@small_words.to_msgpack)
+      end
+
+      conditional_puts "data structure saved"
+      all_words = nil #gb collect
+    else
+      conditional_puts "loading data structure..."
+      @small_words = MessagePack.unpack(File.read('small_word_hash.msg'))
+      conditional_puts "...data structure loaded"
+    end
+
+    return {
+      small_words: @small_words,
+      big_words: @big_words
+    }
+  end
+
+  def conditional_print message
+    if @options[:print_progress]
+      print message
+    end
+  end
+
+  def conditional_puts message
+    if @options[:print_progress]
+      puts message
     end
   end
 end

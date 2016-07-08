@@ -1,10 +1,11 @@
-require 'benchmark'
-require 'msgpack'
-
 # TODO
-# refactoring
+#
+# ____refactoring___
+# options should be a global shared object
+# Word smith: Write unit tests for generation
+# Word smith: Divide into smaller methods
+#
 # cache bestletter + possible_letters
-# Eliminate global variables
 # Remove words if they contain letters not from @options.letters
 
 #
@@ -13,11 +14,23 @@ require 'msgpack'
 
 class WordJuggler
   def initialize(crossword, options = {})
-    @options = options
+    @options = default_options.merge(options)
     @crossword = crossword
     @tried = Array.new(dim_y) { Array.new(dim_x) {Array.new} }
     @last = []
     @last_depth = 0
+  end
+
+  def default_options
+    { 
+      small_word_size: 5,
+      letters: %w(a b c d e f g h i j k l m n o p q r s t u v w x y z æ ø å)
+    }
+  end
+
+  # The word map must be set before the algorithm can run
+  def set_word_map(word_map)
+    @word_map = word_map
   end
 
   def dim_y
@@ -32,10 +45,10 @@ class WordJuggler
     possibilities = 0
 
     if word.length <= @options[:small_word_size]
-      possibilities = $word_hash[word]
+      possibilities = @word_map[:small_words][word]
       possibilities = 0 if possibilities == nil
     else
-      big_word_collection = $big_word_hash["#{word.length}#{letter}#{letter_position}"]
+      big_word_collection = @word_map[:big_words]["#{word.length}#{letter}#{letter_position}"]
       unless big_word_collection == nil
         big_word_collection.each do |w|
           if w.match Regexp.new word
@@ -184,7 +197,7 @@ class WordJuggler
     return true
   end
 
-  def solve
+  def solve()
     while calc_possibilities; end
     ::Renderer.new.render_crossword(@crossword)
   end
